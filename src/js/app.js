@@ -69,7 +69,7 @@ import { Offcanvas, Dropdown } from "bootstrap";
   };
 
   const updateValues = () => {
-    total = 0;
+    let total = 0;
     KEYS.forEach((key) => {
       qty[key] = parseInt(document.getElementById(key).value);
     });
