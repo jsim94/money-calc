@@ -71,7 +71,8 @@ import { Offcanvas, Dropdown } from "bootstrap";
   const updateValues = () => {
     let total = 0;
     KEYS.forEach((key) => {
-      qty[key] = parseInt(document.getElementById(key).value);
+      const val = document.getElementById(key).value;
+      qty[key] = val > 0 ? parseInt(val) : 0;
     });
     inputTotals = sumKeys(qty, KEYS);
     document.getElementById("total").innerText = (inputTotals / 100).toFixed(2);
@@ -127,7 +128,6 @@ import { Offcanvas, Dropdown } from "bootstrap";
   const useHistory = (e) => {
     localStorage.qty = JSON.stringify(history[e.target.dataset.index]);
     location.reload();
-    genOutput();
   };
 
   const deleteHistory = () => {
@@ -148,10 +148,12 @@ import { Offcanvas, Dropdown } from "bootstrap";
     calcAmts();
     genOutput();
     updateHistory();
+    window.scrollBy(0, window.innerHeight);
   };
 
   const reset = () => {
     delete localStorage.qty;
+    location.reload();
   };
 
   const populateHistory = () => {
