@@ -118,8 +118,13 @@ import { Offcanvas, Dropdown } from "bootstrap";
       const time = date.getMonth() + 1 + "/" + date.getDate() + "/" + date.getFullYear() + " @ " + hour + ":" + minute + ":" + second + (pm ? " PM" : " AM");
       return time;
     };
-
     qty.time = getTime();
+    qty.color = (() => {
+      const h = Math.floor(Math.random() * 24) * 15;
+      return `hsl(${h},60%,70%)`;
+    })();
+    console.log(qty.color);
+
     let history = getHistory();
     history.push(qty);
     localStorage.history = JSON.stringify(history);
@@ -163,7 +168,9 @@ import { Offcanvas, Dropdown } from "bootstrap";
     }
     let html = "";
     history.forEach((el, i) => {
-      html = `<li class="list-group-item" role="button" data-index="${i}">${el.time}</li>` + html;
+      html =
+        `<li class="list-group-item" role="button" data-index="${i}">
+      <span class="dot" style="background:${el.color}"> </span> ${el.time}</li>` + html;
     });
     HISTORY_LIST.innerHTML = html;
   };

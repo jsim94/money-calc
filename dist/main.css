@@ -1,6 +1,13 @@
 #inputs .input-group-text {
   width: 65px;
 }
+.dot {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  display: inline-block;
+  transform: translateY(2px);
+}
 
 /*!
  * Bootstrap  v5.2.2 (https://getbootstrap.com/)
