@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Money Counter</title>
+  <link rel="stylesheet" href="./main.css">
+</head>
+
+<body class="bg-dark dark">
+  <nav class="navbar navbar-expand-lg bg-primary navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Mo' Money</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="ms-auto me-3 my-2">
+          <div class="input-group">
+            <span class="input-group-text">Drawer Amount</span>
+            <input id="drawer-amount" type="text" class="form-control" placeholder="$">
+          </div>
+        </div>
+        <ul class="navbar-nav me-0 mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a id="history-btn" class="nav-link active" data-bs-toggle="offcanvas" href="#offcanvas">History</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div>
+      <div class="row mb-3 justify-content-evenly">
+        <p class="col-5 text-light ms-3 my-2">Total: $ <span id="total">0.00</span></p>
+        <p id="timestamp" class="col-5 text-light me-3 my-2 text-end"></p>
+        <button id="submit" class="btn btn-warning col-5">Submit</button>
+        <a id="reset" class="btn btn-danger col-5" href="/">Reset</a>
+      </div>
+    </div>
+    <div id="inputs" class="container"></div>
+    <div id="output" class="row justify-content-evenly"></div>
+  </main>
+
+
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvas">
+
+
+    <div class="offcanvas-header">
+      <h4 class="offcanvas-title">History</h4>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+
+
+    <div class="offcanvas-body">
+      <div class="dropdown mb-4">
+        <a class="dropdown-toggle text-decoration-none text-danger" href="#" role="button" data-bs-toggle="dropdown">
+          Delete History
+        </a>
+        <ul class="dropdown-menu">
+          <li><button class="dropdown-item bg-danger text-light" id="delete-history">Confirm</button></li>
+        </ul>
+      </div>
+      <ul id="history-list" class="list-group list-group-flush">
+        <li class="list-group-item">No History</li>
+      </ul>
+    </div>
+
+
+
+  </div>
+  <script src="main.js"></script>
+</body>
+
+</html>
