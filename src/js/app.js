@@ -16,15 +16,39 @@ import { Offcanvas, Dropdown } from "bootstrap";
     change: { disp: "Change", noValue: true },
     total: { disp: "Total", noValue: true },
   };
-  const KEYS = Object.keys(VALUES).filter((key) => !VALUES[key].noValue);
-  const CHANGE_KEYS = Object.keys(VALUES).filter((key) => VALUES[key].change);
-  const depo = {};
-  const draw = {};
-  let inputTotals = 0;
-  let history = [];
 
+  // array of keys that are related to the transaction, disregards keys related to history
+  const KEYS = Object.keys(VALUES).filter((key) => !VALUES[key].noValue);
+
+  // array of keys that coorespond to coins
+  const CHANGE_KEYS = Object.keys(VALUES).filter((key) => VALUES[key].change);
+
+  // objects that holds values that should be in deposit and in drawer
+  const deposit = {};
+  const drawer = {};
+
+  // sets the amount to be kept in the drawer. Initializes from localstorage value or defaults to $100
+  let drawer_amount = (() => {
+    const amt = parseInt(localStorage.drawerAmount ? localStorage.drawerAmount * 100 : 10000);
+    document.getElementById("drawer-amount").value = (amt / 100).toFixed(2);
+    return amt;
+  })();
+
+  // holds all bill quantities. Initializes from localstorage value or defaults to an empty object
+  const qty = (() => {
+    return localStorage.qty ? JSON.parse(localStorage.qty) : {};
+  })();
+
+  // retrieves history from localstorage or initializes to an empty array
+  const history = localStorage.history ? JSON.parse(localStorage.history) : [];
+
+  // saves total of all inputs
+  let inputTotals = 0;
+
+  // generates HTML for all input fields and appends to "inputs" <div>
   const populateInputs = () => {
     let html = "";
+    // Creates each input field per key. Sets value to qty value or 0
     KEYS.forEach((key) => {
       html += `
     <div class="input-group mb-3">
@@ -35,6 +59,7 @@ import { Offcanvas, Dropdown } from "bootstrap";
     document.getElementById("inputs").innerHTML = html;
     updateValues();
 
+    // if qty has a time property that means it was retrieved from history. Displays the timestamp on page, calculates transaction and generates output. Does not save this transaction to history.
     if (qty.time) {
       document.getElementById("timestamp").innerText = `History: ${qty.time}`;
       calcAmts();
@@ -42,6 +67,7 @@ import { Offcanvas, Dropdown } from "bootstrap";
     }
   };
 
+  // generates HTML for the output values of the transaction and appends to the "output" <div>
   const genOutput = () => {
     const generateTable = (title, data) => {
       let html = `
@@ -57,9 +83,10 @@ import { Offcanvas, Dropdown } from "bootstrap";
       }
       return html + `</table></div>`;
     };
-    document.getElementById("output").innerHTML = generateTable("Deposit", depo) + generateTable("Drawer", draw);
+    document.getElementById("output").innerHTML = generateTable("Deposit", deposit) + generateTable("Drawer", drawer);
   };
 
+  // returns sum of selected keys from the passed data
   const sumKeys = (data, keys) => {
     let total = 0;
     keys.forEach((key) => {
@@ -68,6 +95,7 @@ import { Offcanvas, Dropdown } from "bootstrap";
     return total;
   };
 
+  // updates qty object with the current input values, then sets inputTotals to the sum of all inputs
   const updateValues = () => {
     let total = 0;
     KEYS.forEach((key) => {
@@ -78,31 +106,29 @@ import { Offcanvas, Dropdown } from "bootstrap";
     document.getElementById("total").innerText = (inputTotals / 100).toFixed(2);
   };
 
+  // calculates the total deposit amount
   const calcAmts = () => {
     const depositTotal = inputTotals - drawer_amount;
     let total = 0;
 
     for (let key in VALUES) {
-      depo[key] = 0;
+      deposit[key] = 0;
       for (let i = qty[key]; i > 0; i--) {
         if (total + VALUES[key].value > depositTotal) break;
         total += VALUES[key].value;
-        depo[key] += 1;
+        deposit[key] += 1;
       }
-      draw[key] = qty[key] - depo[key];
+      drawer[key] = qty[key] - deposit[key];
     }
 
-    [depo, draw].forEach((val) => {
+    // add change and total propertys to deposit and drawer objects.
+    [deposit, drawer].forEach((val) => {
       val.change = (sumKeys(val, CHANGE_KEYS) / 100).toFixed(2);
       val.total = (sumKeys(val, KEYS) / 100).toFixed(2);
     });
   };
 
-  const getHistory = () => {
-    history = localStorage.history ? JSON.parse(localStorage.history) : [];
-    return history;
-  };
-
+  // Adds the current time and a random color to the qty object then pushes that qty object to history and saves history to localstorage
   const updateHistory = () => {
     const date = new Date();
     const getTime = () => {
@@ -123,32 +149,37 @@ import { Offcanvas, Dropdown } from "bootstrap";
       const h = Math.floor(Math.random() * 24) * 15;
       return `hsl(${h},60%,70%)`;
     })();
-    console.log(qty.color);
 
-    let history = getHistory();
     history.push(qty);
     localStorage.history = JSON.stringify(history);
   };
 
+  // use history click handler. When a history is clicked, sets qty values to be those stored in the target history index and reloads the page.
   const useHistory = (e) => {
     localStorage.qty = JSON.stringify(history[e.target.dataset.index]);
     location.reload();
   };
 
+  // delete history button handler. Deletes all history from localstorage
   const deleteHistory = () => {
     delete localStorage.history;
     HISTORY_LIST.innerHTML = "No history";
   };
 
+  // sets new drawer amount to localStorage
   const setDrawerAmount = (e) => {
-    localStorage.drawerAmount = e.target.value;
+    const amt = e.target.value;
+    localStorage.drawerAmount = amt;
+    drawerAmount = amt;
   };
 
+  // update handler. Saves all quantities to localstorage and gene
   const update = () => {
     updateValues();
     localStorage.qty = JSON.stringify(qty);
   };
 
+  // submit button handler. Calculates amounts, creates and displayes the output, and saves the transaction to history.
   const submit = () => {
     calcAmts();
     genOutput();
@@ -156,13 +187,14 @@ import { Offcanvas, Dropdown } from "bootstrap";
     window.scrollBy(0, window.innerHeight);
   };
 
+  // resets localstorage qty and reloads page. Does not reset history
   const reset = () => {
     delete localStorage.qty;
     location.reload();
   };
 
+  // grabs history and then populates the slideover with that history
   const populateHistory = () => {
-    const history = getHistory();
     if (!history.length) {
       return;
     }
@@ -175,16 +207,7 @@ import { Offcanvas, Dropdown } from "bootstrap";
     HISTORY_LIST.innerHTML = html;
   };
 
-  const drawer_amount = (() => {
-    const amt = parseInt(localStorage.drawerAmount ? localStorage.drawerAmount * 100 : 10000);
-    document.getElementById("drawer-amount").value = (amt / 100).toFixed(2);
-    return amt;
-  })();
-
-  const qty = (() => {
-    return localStorage.qty ? JSON.parse(localStorage.qty) : {};
-  })();
-
+  // adds all listeners
   document.getElementById("reset").addEventListener("click", reset);
   document.getElementById("drawer-amount").addEventListener("input", setDrawerAmount);
   document.getElementById("inputs").addEventListener("input", update);
@@ -194,5 +217,6 @@ import { Offcanvas, Dropdown } from "bootstrap";
   HISTORY_LIST.addEventListener("click", useHistory);
   document.getElementById("delete-history").addEventListener("click", deleteHistory);
 
+  // application start
   populateInputs();
 })();
